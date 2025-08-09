@@ -6,23 +6,25 @@
 	<style>
 		body {
 			font-family: Arial, sans-serif;
-			background: #f8f8f8;
+			background: #181a1b;
 			margin: 0;
 			padding: 0;
+			color: #e0e0e0;
 		}
 		header {
-			background: #333;
-			color: #fff;
+			background: #111;
+			color: #e0e0e0;
 			padding: 1rem 2rem;
 			text-align: center;
 		}
 		.container {
 			max-width: 600px;
 			margin: 2rem auto;
-			background: #fff;
+			background: #23272b;
 			border-radius: 8px;
-			box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+			box-shadow: 0 2px 8px rgba(0,0,0,0.6);
 			padding: 2rem;
+			color: #e0e0e0;
 		}
 		label {
 			font-weight: bold;
@@ -31,8 +33,36 @@
 			margin-bottom: 1rem;
 			width: 100%;
 			padding: 0.5rem;
-			border: 1px solid #ccc;
+			border: 1px solid #444;
 			border-radius: 4px;
+			background: #23272b;
+			color: #e0e0e0;
+		}
+		textarea {
+			background: #23272b;
+			color: #e0e0e0;
+			border: 1px solid #444;
+			border-radius: 4px;
+		}
+		pre {
+			background: #23272b !important;
+			color: #e0e0e0 !important;
+			border: 1px solid #444;
+			border-radius: 4px;
+		}
+		button {
+			background: #444;
+			color: #fff;
+			border: none;
+			border-radius: 4px;
+			padding: 0.5rem 1rem;
+			cursor: pointer;
+		}
+		button:hover {
+			background: #222;
+		}
+		h3 {
+			color: #e0e0e0;
 		}
 	</style>
 </head>
@@ -43,8 +73,7 @@
 		<button id="printHelpBtn" style="margin-top:10px;">PrintHelp</button>
 	</header>
 	<div class="container">
-	<h3>Valores extraídos:</h3>
-	<pre id="valoresExtraidos" style="background:#f4f4f4;padding:1rem;border-radius:4px;overflow-x:auto;"></pre>
+	<pre id="valoresExtraidos" style="display:none;"></pre>
 		<label for="serviceId">Service ID:</label><br>
 		<input type="text" id="serviceId" name="serviceId" maxlength="16" minlength="16" required pattern=".{15}C" style="text-transform:uppercase;"><br>
 		<label for="pdfInput">Choose a PDF file:</label><br>
@@ -88,14 +117,23 @@
             <label for="ipiBGPvrf">Network for iBGP:</label><br>
 			<input type="text" id="ipiBGPvrf" name="ipiBGPvrf"><br>
 
+            <label for="ipWANCus">Network for WAN:</label><br>
+			<input type="text" id="ipWANCus" name="ipWANCus"><br>
+
 
             <button type="button" id="makeMyWorkBtn">Make my work</button>
 		</form>
-		<textarea id="outputText" style="width:100%;height:400px;margin-top:1rem;"></textarea>
-		<pre id="pdfText" style="background:#eee;padding:1rem;border-radius:4px;overflow-x:auto;"></pre>
+	<textarea id="outputText" style="width:100%;height:400px;margin-top:1rem;color:#00ff00;background:#23272b;border:1px solid #444;border-radius:4px;"></textarea>
+	<button id="copyOutputBtn" style="margin-top:10px;width:100%;">Copiar salida</button>
+	<pre id="pdfText" style="display:none;"></pre>
 	</div>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 	<script>
+	document.getElementById('copyOutputBtn').addEventListener('click', function() {
+		const output = document.getElementById('outputText');
+		output.select();
+		document.execCommand('copy');
+	});
 	document.getElementById('extractBtn').addEventListener('click', async function() {
 		const fileInput = document.getElementById('pdfInput');
 		const pdfText = document.getElementById('pdfText');
@@ -195,12 +233,18 @@
 
 	document.getElementById('makeMyWorkBtn').addEventListener('click', function() {
 		const vlanMGMTEnd = document.getElementById('vlanMGMTEnd').value;
+		const vlanEnd = document.getElementById('vlanEnd').value;
         const ipMGMTCpeEnd = document.getElementById('ipMGMTCpeEnd').value;
         const cpeEnd = document.getElementById('cpeEnd').value;
         const serviceId = document.getElementById('serviceId').value;
         const vrf = document.getElementById('vrf').value;
         const asnSource = document.getElementById('asnSource').value;
         const asnEnd = document.getElementById('asnEnd').value; 
+		const ipiBGPvrf = document.getElementById('ipiBGPvrf').value;
+		const deviceAccessEnd = document.getElementById('deviceAccessEnd').value;
+		const portAccessEnd = document.getElementById('portAccessEnd').value;
+		const ipDeviceAccessEnd = document.getElementById('ipDeviceAccessEnd').value;
+		const ipWANCus = document.getElementById('ipWANCus').value;	
 		const last2 = vlanMGMTEnd.slice(-2);
 
 		// Calcular el gateway .1 de la red /24
@@ -212,10 +256,68 @@
 			}
 		}
 
+		// Calcular ipiBGPPeerLocal sumando 2 al último octeto de ipiBGPvrf
+		let ipiBGPPeerLocal = '';
+		if (ipiBGPvrf) {
+			const octets = ipiBGPvrf.split('.');
+			if (octets.length === 4) {
+				const last = parseInt(octets[3], 10);
+				if (!isNaN(last)) {
+					ipiBGPPeerLocal = `${octets[0]}.${octets[1]}.${octets[2]}.${last + 2}`;
+				}
+			}
+		}
+
+		// Calcular ipiBGPPeerRemote sumando 1 al último octeto de ipiBGPvrf
+		let ipiBGPPeerRemote = '';
+		if (ipiBGPvrf) {
+			const octets = ipiBGPvrf.split('.');
+			if (octets.length === 4) {
+				const last = parseInt(octets[3], 10);
+				if (!isNaN(last)) {
+					ipiBGPPeerRemote = `${octets[0]}.${octets[1]}.${octets[2]}.${last + 1}`;
+				}
+			}
+		}
+
+		// Calcular ipWANCusLocal sumando 1 al último octeto de ipWANCus
+		let ipWANCusLocal = '';
+		if (ipWANCus) {
+			const octets = ipWANCus.split('.');
+			if (octets.length === 4) {
+				const last = parseInt(octets[3], 10);
+				if (!isNaN(last)) {
+					ipWANCusLocal = `${octets[0]}.${octets[1]}.${octets[2]}.${last + 1}`;
+				}
+			}
+		}
+
 		const texto = `configure port
 svi ${last2}
 name FN:MGT-AG:HN${last2}
 no shutdown
+exit all
+
+configure port
+ethernet 0/1
+name NNI-FN:TRK-TC:FO-EV:${deviceAccessEnd}-PV:${portAccessEnd}-DE:${ipDeviceAccessEnd}
+no shutdown
+exit
+ethernet 0/2
+shutdown
+exit
+ethernet 0/3
+name UNI-IDU:${serviceId}-DE:CUS-PLACE
+no shutdown
+exit
+ethernet 0/4
+shutdown
+exit
+ethernet 0/5
+shutdown
+exit
+ethernet 0/6
+shutdown
 exit all
 
 configure flows
@@ -347,11 +449,11 @@ no shutdown
 exit all
 
 configure flows 
-classifier-profile vlan3407 match-any
-match vlan 3407
+classifier-profile vlan${vlanEnd} match-any
+match vlan ${vlanEnd}
 exit
 flow ${serviceId}-BGP-IN
-    classifier vlan3407
+    classifier vlan${vlanEnd}
     no policer
     vlan-tag pop vlan
     ingress-port ethernet 0/1
@@ -361,7 +463,7 @@ exit
 flow ${serviceId}-BGP-OUT
     classifier mng_all
     no policer
-    vlan-tag push vlan 3407 p-bit fixed 0
+    vlan-tag push vlan ${vlanEnd} p-bit fixed 0
     ingress-port svi 2
     egress-port ethernet 0/1 queue 0 block 0/1
     no shutdown
@@ -369,6 +471,7 @@ exit
 flow ${serviceId}-WAN-IN
     classifier mng_untagged
     no policer
+	no vlan-tag
     ingress-port ethernet 0/3
     egress-port svi 3
     no shutdown
@@ -376,6 +479,7 @@ exit
 flow ${serviceId}-WAN-OUT
     classifier mng_untagged
     no policer
+	no vlan-tag
     ingress-port svi 3
     egress-port ethernet 0/3 queue 0 block 0/1
     no shutdown
@@ -385,30 +489,31 @@ exit all
 configure router 2
 name ${vrf}
 interface 2
-address 10.255.64.186/30
+address ${ipiBGPPeerLocal}/30
 bind svi 2
 no shutdown
 exit
 interface 3
-address 172.30.30.1/30
+address ${ipWANCusLocal}/30
 bind svi 3
 no shutdown
 exit
-static-route 19.99.99.99/32 address 172.30.30.2 install
+static-route ${ipWANCus}/30 address ${ipWANCusLocal} install
 bgp ${asnEnd}
-router-id 10.255.64.186
+router-id ${ipiBGPPeerLocal}
 no shutdown
-neighbor 10.255.64.185
+	neighbor ${ipiBGPPeerRemote}
     max-prefixes 20000
     remote-as ${asnSource}
     no shutdown
 exit
 ipv4-unicast-af
-    network 172.30.30.0/30
+    network ${ipWANCus}/30
     redistribute static
-    neighbor 10.255.64.185
+    neighbor ${ipiBGPPeerRemote}
     active
-exit all`;
+exit all
+save`;
 		document.getElementById('outputText').value = texto;
 	});
 

@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+	<meta charset="UTF-8">
+	<title>UFIbot - Procesador de PDF</title>
+	<style>
+		body {
+			font-family: Arial, sans-serif;
+			background: #f8f8f8;
+			margin: 0;
+			padding: 0;
+		}
+		header {
+			background: #333;
+			color: #fff;
+			padding: 1rem 2rem;
+			text-align: center;
+		}
+		.container {
+			max-width: 600px;
+			margin: 2rem auto;
+			background: #fff;
+			border-radius: 8px;
+			box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+			padding: 2rem;
+		}
+		label {
+			font-weight: bold;
+		}
+		input[type="file"], input[type="text"] {
+			margin-bottom: 1rem;
+			width: 100%;
+			padding: 0.5rem;
+			border: 1px solid #ccc;
+			border-radius: 4px;
+		}
+	</style>
+</head>
+<body>
+	<header>
+		<h1>UFIbot</h1>
+		<p>Get Data info for RAD ETC L3 Service config CPE</p>
+		<button id="printHelpBtn" style="margin-top:10px;">PrintHelp</button>
+	</header>
+	<div class="container">
+	<h3>Valores extraídos:</h3>
+	<pre id="valoresExtraidos" style="background:#f4f4f4;padding:1rem;border-radius:4px;overflow-x:auto;"></pre>
+		<label for="serviceId">Service ID:</label><br>
+		<input type="text" id="serviceId" name="serviceId" maxlength="16" minlength="16" required pattern=".{15}C" style="text-transform:uppercase;"><br>
+		<label for="pdfInput">Choose a PDF file:</label><br>
+		<input type="file" id="pdfInput" accept="application/pdf" disabled><br>
+		<button id="extractBtn">GetheBit</button>
+	<h3>Data from PDF:</h3>
+		<form id="formDatos">
+			<label for="deviceAccessEnd">Device Access End:</label><br>
+			<input type="text" id="deviceAccessEnd" name="deviceAccessEnd"><br>
+
+			<label for="ipDeviceAccessEnd">IP Device Access End:</label><br>
+			<input type="text" id="ipDeviceAccessEnd" name="ipDeviceAccessEnd"><br>
+
+			<label for="portAccessEnd">Port Access End:</label><br>
+			<input type="text" id="portAccessEnd" name="portAccessEnd"><br>
+
+			<label for="cpeEnd">CPE End:</label><br>
+			<input type="text" id="cpeEnd" name="cpeEnd"><br>
+
+			<label for="ipMGMTCpeEnd">IP MGMT CPE End:</label><br>
+			<input type="text" id="ipMGMTCpeEnd" name="ipMGMTCpeEnd"><br>
+
+			<label for="vrf">VRF:</label><br>
+			<input type="text" id="vrf" name="vrf"><br>
+
+			<label for="portCpeEnd">Port CPE End:</label><br>
+			<input type="text" id="portCpeEnd" name="portCpeEnd"><br>
+
+			<label for="vlanMGMTEnd">Vlan MGMT End:</label><br>
+			<input type="text" id="vlanMGMTEnd" name="vlanMGMTEnd"><br>
+
+			<label for="vlanEnd">Vlan End:</label><br>
+			<input type="text" id="vlanEnd" name="vlanEnd"><br>
+
+			<label for="asnSource">ASN Source:</label><br>
+			<input type="text" id="asnSource" name="asnSource"><br>
+
+			<label for="asnEnd">ASN End:</label><br>
+			<input type="text" id="asnEnd" name="asnEnd"><br>
+
+            <label for="ipiBGPvrf">Network for iBGP:</label><br>
+			<input type="text" id="ipiBGPvrf" name="ipiBGPvrf"><br>
+
+
+            <button type="button" id="makeMyWorkBtn">Make my work</button>
+		</form>
+		<textarea id="outputText" style="width:100%;height:400px;margin-top:1rem;"></textarea>
+		<pre id="pdfText" style="background:#eee;padding:1rem;border-radius:4px;overflow-x:auto;"></pre>
+	</div>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+	<script>
+	document.getElementById('extractBtn').addEventListener('click', async function() {
+		const fileInput = document.getElementById('pdfInput');
+		const pdfText = document.getElementById('pdfText');
+		if (!fileInput.files.length) {
+			pdfText.textContent = 'Please choose a L3 service Phoenix PDF.';
+			return;
+		}
+		const file = fileInput.files[0];
+		const reader = new FileReader();
+		reader.onload = async function() {
+			const typedarray = new Uint8Array(reader.result);
+			const pdf = await pdfjsLib.getDocument(typedarray).promise;
+			let text = '';
+			for (let i = 1; i <= pdf.numPages; i++) {
+				const page = await pdf.getPage(i);
+				const content = await page.getTextContent();
+				text += content.items.map(item => item.str).join(' ') + '\n';
+			}
+			pdfText.textContent = text;
+			// Extraer y llenar automáticamente los campos del formulario
+			const campos = [
+				{id: 'deviceAccessEnd', label: 'Device Access End', regex: /Device Access End: ([^\n]+)/},
+				{id: 'ipDeviceAccessEnd', label: 'IP Device Access End', regex: /IP Device Access End: ([^\n]+)/},
+				{id: 'portAccessEnd', label: 'Port Access End', regex: /Port Access End: ([^\n]+)/},
+				{id: 'cpeEnd', label: 'CPE End', regex: /CPE End: ([^\n]+)/},
+				{id: 'ipMGMTCpeEnd', label: 'IP MGMT CPE End', regex: /IP MGMT CPE End: ([^\n]+)/},
+				{id: 'vrf', label: 'VRF', regex: /VRF\s*:?\s*([^\s\n]+)/i},
+				{id: 'portCpeEnd', label: 'Port CPE End', regex: /Port CPE End: ([^\n]+)/},
+				{id: 'vlanMGMTEnd', label: 'Vlan MGMT End', regex: /Vlan MGMT End: ([^\n]+)/},
+				{id: 'vlanEnd', label: 'Vlan End', regex: /Vlan End: ([^\n]+)/},
+				{id: 'asnSource', label: 'ASN Origen', regex: /ASN Origen: ([^\n]+)/},
+				{id: 'asnEnd', label: 'ASN End', regex: /ASN End: ([^\n]+)/},
+                {id: 'ipiBGPvrf', label: 'Network for iBGP', regex: /Direccionamiento Público\/Privado Origen:?\s*([^\n]+)/}
+			];
+			let resultado = '';
+			campos.forEach(campo => {
+				let valor = '';
+				if (campo.id === 'deviceAccessEnd') {
+					// Extraer desde 'Device Access End' hasta 'QoS'
+					const match = text.match(/Equipo Acceso Destino:?\s*([\s\S]*?)QoS/i);
+					valor = match ? match[1].trim() : '';
+				} else if (campo.id === 'ipDeviceAccessEnd') {
+					// Extraer desde 'IP Device Access End' hasta 'Capacidad Burst (Mbps)'
+					const match = text.match(/IP Equipo Acceso Destino:?\s*([\s\S]*?)Capacidad Burst \(Mbps\)/i);
+					valor = match ? match[1].trim() : '';
+				} else if (campo.id === 'portAccessEnd') {
+					// Extraer desde 'Port Access End' hasta 'Precio burst por mpbs'
+					const match = text.match(/Puerto Acceso Destino:?\s*([\s\S]*?)Precio burst por mpbs/i);
+					valor = match ? match[1].trim() : '';
+				} else if (campo.id === 'cpeEnd') {
+					// Extraer desde 'CPE End' hasta 'QoS Burst'
+					const match = text.match(/CPE Destino:?\s*([\s\S]*?)QoS Burst/i);
+					valor = match ? match[1].trim() : '';
+				} else if (campo.id === 'ipMGMTCpeEnd') {
+					// Extraer desde 'IP MGMT CPE End' hasta 'VRF'
+					const match = text.match(/IP Gestión CPE Destino:?\s*([\s\S]*?)VRF/i);
+					valor = match ? match[1].trim() : '';
+				} else if (campo.id === 'portCpeEnd') {
+					// Extraer desde 'Port CPE End' hasta 'VRF RD'
+					const match = text.match(/Puerto CPE Destino:?\s*([\s\S]*?)VRF RD/i);
+					valor = match ? match[1].trim() : '';
+				} else if (campo.id === 'vlanMGMTEnd') {
+					// Extraer desde 'Vlan MGMT End' hasta 'BDI'
+					const match = text.match(/Vlan Gestión Destino:?\s*([\s\S]*?)BDI/i);
+					valor = match ? match[1].trim() : '';
+				} else if (campo.id === 'vlanEnd') {
+					// Extraer desde 'Vlan End' hasta 'URL Monitoreo'
+					const match = text.match(/Vlan Destino:?\s*([\s\S]*?)URL Monitoreo/i);
+					valor = match ? match[1].trim() : '';
+				} else if (campo.id === 'asnSource') {
+					// Extraer desde 'ASN Origen' hasta 'ASN Destino'
+					const match = text.match(/ASN Origen:?\s*([\s\S]*?)ASN Destino/i);
+					valor = match ? match[1].trim() : '';
+				} else if (campo.id === 'asnEnd') {
+					// Extraer desde 'ASN Destino' hasta 'Direccionamiento Público/Privado Origen'
+					const match = text.match(/ASN Destino:?\s*([\s\S]*?)Direccionamiento P/i);
+					valor = match ? match[1].trim() : '';
+                } else if (campo.id === 'ipiBGPvrf') {
+    // Extraer la red para iBGP después de 'Direccionamiento Público/Privado Origen:'
+    const match = text.match(/Direccionamiento Público\/Privado Origen:?\s*([\s\S]*?)Direccionamiento P/i);
+    valor = match ? match[1].trim() : '';
+
+
+				} else {
+					const match = text.match(campo.regex);
+					valor = match ? match[1].trim() : '';
+				}
+				resultado += campo.label + ': ' + valor + '\n';
+				// Llenar el campo del formulario si existe
+				const input = document.getElementById(campo.id);
+				if (input) input.value = valor;
+			});
+			document.getElementById('valoresExtraidos').textContent = resultado;
+		};
+		reader.readAsArrayBuffer(file);
+	});
+
+	document.getElementById('makeMyWorkBtn').addEventListener('click', function() {
+		const vlanMGMTEnd = document.getElementById('vlanMGMTEnd').value;
+        const ipMGMTCpeEnd = document.getElementById('ipMGMTCpeEnd').value;
+        const cpeEnd = document.getElementById('cpeEnd').value;
+        const serviceId = document.getElementById('serviceId').value;
+        const vrf = document.getElementById('vrf').value;
+        const asnSource = document.getElementById('asnSource').value;
+        const asnEnd = document.getElementById('asnEnd').value; 
+		const last2 = vlanMGMTEnd.slice(-2);
+
+		// Calcular el gateway .1 de la red /24
+		let gwMGMTCpeEnd = '';
+		if (ipMGMTCpeEnd) {
+			const octets = ipMGMTCpeEnd.split('.');
+			if (octets.length === 4) {
+				gwMGMTCpeEnd = `${octets[0]}.${octets[1]}.${octets[2]}.1`;
+			}
+		}
+
+		const texto = `configure port
+svi ${last2}
+name FN:MGT-AG:HN${last2}
+no shutdown
+exit all
+
+configure flows
+classifier-profile vlan${vlanMGMTEnd} match-any
+match vlan ${vlanMGMTEnd}
+exit
+
+flow UFI-MGT
+classifier mng_all
+vlan-tag push vlan ${vlanMGMTEnd} p-bit fixed 0
+ingress-port svi ${last2}
+egress-port ethernet 0/1 queue 0 block 0/1
+no shutdown
+exit
+
+flow UFI-IN
+classifier vlan${vlanMGMTEnd}
+vlan-tag pop vlan
+ingress-port ethernet 0/1
+egress-port svi ${last2}
+no shutdown
+exit all
+
+configure router 1
+interface 30
+address ${ipMGMTCpeEnd}/24
+bind svi ${last2}
+exit
+static-route 0.0.0.0/0 address ${gwMGMTCpeEnd}
+exit all
+save
+
+configure access-control access-list MGMT
+permit ip 10.200.25.0/24 any sequence 10
+permit ip 10.200.26.0/24 any sequence 20
+permit ip 10.250.55.0/24 any sequence 30
+permit ip 10.40.6.0/24 any sequence 40
+permit ip 10.41.0.0/24 any sequence 50
+permit ip 169.254.0.0/16 any sequence 60
+permit ip any any sequence 100
+exit all
+
+configure system
+name ${cpeEnd}
+syslog device
+severity-level warning
+exit
+syslog server 1
+address 10.250.55.224
+accounting commands
+no shutdown
+exit
+syslog server 2
+address 10.109.144.41
+accounting commands
+no shutdown
+exit all
+
+
+configure management snmp
+snmp-engine-id mac 18-06-F5-8C-15-A1
+community read
+name ufinet
+sec-name v2_read
+no shutdown
+exit
+community read1
+name uf1c0l
+sec-name v2_read
+no shutdown
+exit
+community trap
+name ufinet
+sec-name v2_trap
+no shutdown
+exit
+community write
+name pnrw-all
+sec-name v2_write
+no shutdown
+exit
+target-params snmpv2c
+message-processing-model snmpv2c
+version snmpv2c
+security name v2_write level no-auth-no-priv
+no shutdown
+exit
+target Ufinet
+target-params snmpv2c
+address udp-domain 10.109.210.10
+no shutdown
+exit
+target Ufinet1
+target-params snmpv2c
+address udp-domain 10.109.185.39
+no shutdown
+exit all
+
+
+configure management access
+auth-policy 1st-level tacacs+
+exit
+tacacsplus
+group ADMIN
+accounting shell system commands
+exit
+server 10.109.3.33
+key B072DF7D5784227CB80D1518ED0007A3 hash
+group ADMIN
+no shutdown
+exit
+server 10.250.55.168
+key B072DF7D5784227CB80D1518ED0007A3 hash
+group ADMIN
+no shutdown
+exit
+exit
+management-address ipv4 ${ipMGMTCpeEnd}
+exit all
+
+configure port
+svi 2
+name ${serviceId}-BGP
+no shutdown
+exit
+svi 3
+name ${serviceId}-WAN
+no shutdown
+exit all
+
+configure flows 
+classifier-profile vlan3407 match-any
+match vlan 3407
+exit
+flow ${serviceId}-BGP-IN
+    classifier vlan3407
+    no policer
+    vlan-tag pop vlan
+    ingress-port ethernet 0/1
+    egress-port svi 2
+    no shutdown
+exit
+flow ${serviceId}-BGP-OUT
+    classifier mng_all
+    no policer
+    vlan-tag push vlan 3407 p-bit fixed 0
+    ingress-port svi 2
+    egress-port ethernet 0/1 queue 0 block 0/1
+    no shutdown
+exit
+flow ${serviceId}-WAN-IN
+    classifier mng_untagged
+    no policer
+    ingress-port ethernet 0/3
+    egress-port svi 3
+    no shutdown
+exit
+flow ${serviceId}-WAN-OUT
+    classifier mng_untagged
+    no policer
+    ingress-port svi 3
+    egress-port ethernet 0/3 queue 0 block 0/1
+    no shutdown
+exit all
+
+
+configure router 2
+name ${vrf}
+interface 2
+address 10.255.64.186/30
+bind svi 2
+no shutdown
+exit
+interface 3
+address 172.30.30.1/30
+bind svi 3
+no shutdown
+exit
+static-route 19.99.99.99/32 address 172.30.30.2 install
+bgp ${asnEnd}
+router-id 10.255.64.186
+no shutdown
+neighbor 10.255.64.185
+    max-prefixes 20000
+    remote-as ${asnSource}
+    no shutdown
+exit
+ipv4-unicast-af
+    network 172.30.30.0/30
+    redistribute static
+    neighbor 10.255.64.185
+    active
+exit all`;
+		document.getElementById('outputText').value = texto;
+	});
+
+	// Validar Service ID y habilitar pdfInput
+	const serviceIdInput = document.getElementById('serviceId');
+	const pdfInput = document.getElementById('pdfInput');
+	serviceIdInput.addEventListener('input', function() {
+		const value = serviceIdInput.value.toUpperCase();
+		serviceIdInput.value = value;
+		const valid = value.length === 16 && value.endsWith('C');
+		pdfInput.disabled = !valid;
+		serviceIdInput.setCustomValidity(valid ? '' : 'Service ID debe tener 16 caracteres y terminar en C');
+	});
+
+	document.getElementById('printHelpBtn').addEventListener('click', function() {
+		const popup = window.open('', 'PrintHelp', 'width=' + screen.width + ',height=' + screen.height + ',top=0,left=0');
+		popup.moveTo(0, 0);
+		popup.resizeTo(screen.width, screen.height);
+		popup.document.write(`
+			<!DOCTYPE html>
+			<html>
+			<head>
+				<title>PrintHelp</title>
+				<style>
+					body { margin:0; padding:0; background:#fff; }
+					.img-container {
+						position: relative;
+						width: 100vw;
+						height: 100vh;
+						overflow: hidden;
+					}
+					.help-text {
+						position: absolute;
+						top: 30px;
+						left: 0;
+						width: 100%;
+						text-align: center;
+						font-size: 2rem;
+						font-weight: bold;
+						color: #fff;
+						background: rgba(0,0,0,0.5);
+						padding: 1rem 0;
+						z-index: 2;
+					}
+					img {
+						width: 100vw;
+						height: 100vh;
+						object-fit: contain;
+						display: block;
+					}
+				</style>
+			</head>
+			<body>
+				<div class="img-container">
+					<div class="help-text">
+						Print in Tabloid size, Margin: 1" top and footer, no print headers, footers and Graphis
+					</div>
+					<img src="printHelp.png" alt="Print Help">
+				</div>
+			</body>
+			</html>
+		`);
+	});
+	</script>
+</body>
+</html>

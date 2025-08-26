@@ -1,0 +1,154 @@
+/* Dos columnas para los campos del formulario */
+#formDatos {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.2rem 2rem;
+  align-items: center;
+}
+#formDatos label {
+  grid-column: span 1;
+  margin-top: 0;
+  margin-bottom: 0.2em;
+}
+#formDatos input[type="text"] {
+  grid-column: span 1;
+  width: 100%;
+  margin-bottom: 0.5em;
+}
+#formDatos button {
+  grid-column: 1 / -1;
+  justify-self: center;
+  margin-top: 1em;
+}
+/* Ocultar el pre con id pdfText */
+#pdfText {
+  display: none !important;
+}
+/* Estilos para el header y el icono */
+.ufibot-icon {
+  height: 60px;
+  width: auto;
+  vertical-align: middle;
+  margin-bottom: 0.3em;
+}
+.ufibot-title {
+  display: inline-block;
+  vertical-align: middle;
+  margin-left: 0.5em;
+}
+/* Material 3 inspired dynamic color theme for ufibot.html */
+:root {
+  --m3-primary: #6750a4;
+  --m3-on-primary: #fff;
+  --m3-surface: #f5f5f5;
+  --m3-on-surface: #1a1a1a;
+  --m3-secondary: #625b71;
+  --m3-on-secondary: #fff;
+  --m3-outline: #cac4d0;
+  --m3-bg: #ece6f0;
+  --m3-dynamic: #00bcd4;
+}
+
+body {
+  font-family: 'Roboto', Arial, sans-serif;
+  background: var(--m3-bg);
+  color: var(--m3-on-surface);
+  margin: 0;
+  padding: 0;
+}
+
+header {
+  background: var(--m3-primary);
+  color: var(--m3-on-primary);
+  padding: 1.5rem 2rem 1rem 2rem;
+  text-align: center;
+  border-bottom: 4px solid var(--m3-dynamic);
+}
+
+h1 {
+  margin: 0 0 0.2em 0;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+button {
+  background: linear-gradient(90deg, var(--m3-primary), var(--m3-dynamic));
+  color: var(--m3-on-primary);
+  border: none;
+  border-radius: 24px;
+  padding: 0.7rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  margin-top: 1rem;
+  transition: background 0.2s, box-shadow 0.2s;
+  box-shadow: 0 2px 8px rgba(103,80,164,0.08);
+}
+button:hover {
+  background: linear-gradient(90deg, var(--m3-dynamic), var(--m3-primary));
+  box-shadow: 0 4px 16px rgba(0,188,212,0.12);
+}
+
+form, div {
+  max-width: 600px;
+  margin: 2rem auto;
+  background: var(--m3-surface);
+  border-radius: 16px;
+  box-shadow: 0 2px 12px rgba(103,80,164,0.10);
+  padding: 2rem;
+}
+
+label {
+  font-weight: 600;
+  color: var(--m3-secondary);
+  display: block;
+  margin-top: 1rem;
+}
+
+input[type="file"], input[type="text"] {
+  margin-bottom: 1rem;
+  width: 100%;
+  padding: 0.7rem;
+  border: 1.5px solid var(--m3-outline);
+  border-radius: 8px;
+  background: #fff;
+  color: var(--m3-on-surface);
+  font-size: 1rem;
+  transition: border 0.2s;
+}
+input[type="file"]:focus, input[type="text"]:focus {
+  border: 1.5px solid var(--m3-primary);
+  outline: none;
+}
+
+textarea {
+  width: 100%;
+  min-height: 200px;
+  background: #fff;
+  color: var(--m3-on-surface);
+  border: 1.5px solid var(--m3-outline);
+  border-radius: 8px;
+  font-size: 1rem;
+  padding: 1rem;
+  margin-top: 1rem;
+  font-family: 'Roboto Mono', monospace;
+  resize: vertical;
+}
+
+pre {
+  background: #f3f0fa;
+  color: var(--m3-on-surface);
+  border: 1.5px solid var(--m3-outline);
+  border-radius: 8px;
+  padding: 1rem;
+  overflow-x: auto;
+  font-size: 0.95rem;
+  margin-top: 1rem;
+}
+
+@media (max-width: 700px) {
+  form, div {
+    max-width: 98vw;
+    padding: 1rem;
+  }
+}

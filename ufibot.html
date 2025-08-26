@@ -8,9 +8,10 @@
 </head>
 <body>
 	<header>
-		 <img src="ths95rths95rths9.png" alt="UFIbot icon" class="ufibot-icon">
-		 <h1 class="ufibot-title">alegrUFI</h1>
+		 <img src="ths95rths95rths9.png" alt="alegrUFI icon" class="alegrUFI-icon">
+		 <h1 class="alegrUFI-title">alegrUFI</h1>
 		<p>Get Data info for RAD ETC L3 Service config CPE</p>
+	<p>supported by <a class="alegrUFI-link" href="mailto:rham@ufinet.com">rham@ufinet.com</a></p>
 		<button id="printHelpBtn">PrintHelp</button>
 	</header>
 	<div>
@@ -22,49 +23,40 @@
 		<button id="extractBtn">GetheBit</button>
 	<h3>Data from PDF:</h3>
 		<form id="formDatos">
-			<label for="deviceAccessEnd">Device Access End:</label><br>
-			<input type="text" id="deviceAccessEnd" name="deviceAccessEnd"><br>
-
-			<label for="ipDeviceAccessEnd">IP Device Access End:</label><br>
-			<input type="text" id="ipDeviceAccessEnd" name="ipDeviceAccessEnd"><br>
-
-			<label for="portAccessEnd">Port Access End:</label><br>
-			<input type="text" id="portAccessEnd" name="portAccessEnd"><br>
-
-			<label for="cpeEnd">CPE End:</label><br>
-			<input type="text" id="cpeEnd" name="cpeEnd"><br>
-
-			<label for="ipMGMTCpeEnd">IP MGMT CPE End:</label><br>
-			<input type="text" id="ipMGMTCpeEnd" name="ipMGMTCpeEnd"><br>
-
-			<label for="vrf">VRF:</label><br>
-			<input type="text" id="vrf" name="vrf"><br>
-
-			<label for="portCpeEnd">Port CPE End:</label><br>
-			<input type="text" id="portCpeEnd" name="portCpeEnd"><br>
-
-			<label for="vlanMGMTEnd">Vlan MGMT End:</label><br>
-			<input type="text" id="vlanMGMTEnd" name="vlanMGMTEnd"><br>
-
-			<label for="vlanEnd">Vlan End:</label><br>
-			<input type="text" id="vlanEnd" name="vlanEnd"><br>
-
-			<label for="asnSource">ASN Source:</label><br>
-			<input type="text" id="asnSource" name="asnSource"><br>
-
-			<label for="asnEnd">ASN End:</label><br>
-			<input type="text" id="asnEnd" name="asnEnd"><br>
-
-            <label for="ipiBGPvrf">Network for iBGP:</label><br>
-			<input type="text" id="ipiBGPvrf" name="ipiBGPvrf"><br>
-
-            <label for="ipWANCus">Network for WAN:</label><br>
-			<input type="text" id="ipWANCus" name="ipWANCus"><br>
-
-
-            <button type="button" id="makeMyWorkBtn">Make my work</button>
+	<table width="100%"><tr valign="top">
+	<td id="td1">
+		<label for="deviceAccessEnd">Device Access End:</label><br>
+		<input type="text" id="deviceAccessEnd" name="deviceAccessEnd"><br>
+		<label for="portAccessEnd">Port Access End:</label><br>
+		<input type="text" id="portAccessEnd" name="portAccessEnd"><br>
+		<label for="cpeEnd">CPE End:</label><br>
+		<input type="text" id="cpeEnd" name="cpeEnd"><br>
+		<label for="vrf">VRF:</label><br>
+		<input type="text" id="vrf" name="vrf"><br>
+		<label for="vlanMGMTEnd">Vlan MGMT End:</label><br>
+		<input type="text" id="vlanMGMTEnd" name="vlanMGMTEnd"><br>
+		<label for="asnSource">ASN Source:</label><br>
+		<input type="text" id="asnSource" name="asnSource"><br>
+	</td>
+	<td id="td2">
+		<label for="ipDeviceAccessEnd">IP Device Access End:</label><br>
+		<input type="text" id="ipDeviceAccessEnd" name="ipDeviceAccessEnd"><br>
+		<label for="ipMGMTCpeEnd">IP MGMT CPE End:</label><br>
+		<input type="text" id="ipMGMTCpeEnd" name="ipMGMTCpeEnd"><br>
+		<label for="portCpeEnd">Port CPE End:</label><br>
+		<input type="text" id="portCpeEnd" name="portCpeEnd"><br>
+		<label for="vlanEnd">Vlan End:</label><br>
+		<input type="text" id="vlanEnd" name="vlanEnd"><br>
+		<label for="asnEnd">ASN End:</label><br>
+		<input type="text" id="asnEnd" name="asnEnd"><br>
+		<label for="ipiBGPvrf">Network for iBGP:</label><br>
+		<input type="text" id="ipiBGPvrf" name="ipiBGPvrf"><br>
+		<label for="ipWANCus">Network for WAN:</label><br>
+		<input type="text" id="ipWANCus" name="ipWANCus"><br>
+	</td>
+	</tr></table>
 		</form>
-	
+	<button type="button" id="makeMyWorkBtn">Make my work</button>
 	<textarea id="outputText"></textarea>
 	<button id="copyOutputBtn">Copiar salida</button>
 		<pre id="valoresExtraidos"><h5>Material:</h5></pre>
@@ -460,16 +452,7 @@ save`;
 		document.getElementById('outputText').value = texto;
 	});
 
-	// Validar Service ID y habilitar pdfInput
-	const serviceIdInput = document.getElementById('serviceId');
-	const pdfInput = document.getElementById('pdfInput');
-	serviceIdInput.addEventListener('input', function() {
-		const value = serviceIdInput.value.toUpperCase();
-		serviceIdInput.value = value;
-		const valid = value.length === 16 && value.endsWith('C');
-		pdfInput.disabled = !valid;
-		serviceIdInput.setCustomValidity(valid ? '' : 'Service ID debe tener 16 caracteres y terminar en C');
-	});
+	// Validación de Service ID trasladada a ufibot.js
 
 	document.getElementById('printHelpBtn').addEventListener('click', function() {
 		const popup = window.open('', 'PrintHelp', 'width=' + screen.width + ',height=' + screen.height + ',top=0,left=0');
@@ -494,5 +477,6 @@ save`;
 		`);
 	});
 	</script>
+	<script src="ufibot.js"></script>
 </body>
 </html>

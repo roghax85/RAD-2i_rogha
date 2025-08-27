@@ -1,3 +1,66 @@
+/* Estilos para el menú rápido en index.html */
+.quick-menu {
+  margin: 2rem auto;
+  max-width: 400px;
+  background: var(--m3-surface, #f5f5f5);
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(103,80,164,0.08);
+  padding: 1.5rem;
+}
+.quick-menu-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.quick-menu-item {
+  margin: 0.5em 0;
+  font-size: 1.1em;
+  font-family: 'Roboto', Arial, sans-serif;
+}
+.quick-menu-link {
+  color: var(--m3-primary, #6750a4);
+  text-decoration: none;
+  font-weight: bold;
+  transition: color 0.2s;
+}
+.quick-menu-link:hover {
+  color: var(--m3-dynamic, #00bcd4);
+  text-decoration: underline;
+}
+#outputText {
+  display: none !important;
+}
+#outputHtml span#value {
+  color: #00ffff;
+  animation: blink-cyan 1s steps(2, start) infinite;
+}
+
+@keyframes blink-cyan {
+  to {
+    visibility: hidden;
+  }
+}
+#outputHtml span#value {
+  color: #00ffff;
+  font-weight: bold;
+}
+/* Estilo para que #outputHtml se vea como un textarea */
+#outputHtml {
+  width: 97%;
+  min-height: 200px;
+  background: #000;
+  color: #00ff00;
+  border: 1.5px solid var(--m3-outline);
+  border-radius: 8px;
+  font-size: 0.85rem;
+  padding: 1rem;
+  margin-top: 1rem;
+  font-family: 'Roboto Mono', monospace;
+  resize: vertical;
+  box-sizing: border-box;
+  white-space: pre-wrap;
+  overflow-x: auto;
+}
 /* Enlaces sin estilo visual */
 .alegrUFI-link, .alegrUFI-link:visited, .alegrUFI-link:active, .alegrUFI-link:focus, .alegrUFI-link:hover {
   color: inherit;
@@ -118,13 +181,13 @@ input[type="file"]:focus, input[type="text"]:focus {
 }
 
 textarea {
-  width: 100%;
-  min-height: 200px;
-  background: #fff;
-  color: var(--m3-on-surface);
+  width: 97%;
+  min-height: 400px;
+  background: #000;
+  color: #00ff00;
   border: 1.5px solid var(--m3-outline);
   border-radius: 8px;
-  font-size: 1rem;
+  font-size: 0.85rem;
   padding: 1rem;
   margin-top: 1rem;
   font-family: 'Roboto Mono', monospace;

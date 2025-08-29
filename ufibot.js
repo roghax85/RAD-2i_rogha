@@ -323,6 +323,13 @@ document.addEventListener('DOMContentLoaded', function() {
 				return;
 			}
 			const file = fileInput.files[0];
+			// Guardar el serviceId en el backend
+			const serviceId = document.getElementById('serviceId').value;
+			fetch('http://localhost:3000/log-serviceid', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ serviceId })
+			});
 			const reader = new FileReader();
 			reader.onload = async function() {
 				const typedarray = new Uint8Array(reader.result);

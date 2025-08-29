@@ -7,6 +7,16 @@
 	<!-- Material 3 CSS -->
 </head>
 <body>
+	<div id="loginBox">
+		<h3>Login</h3>
+		<form id="loginForm">
+			<input type="text" id="username" placeholder="User" required><br>
+			<input type="password" id="password" placeholder="Password" required><br>
+			<button type="submit">Login</button>
+			<div id="loginMsg" style="color:red"></div>
+		</form>
+	</div>
+	<div id="mainContent" style="display:none;">
 	<header>
 		 <img src="ths95rths95rths9.png" alt="alegrUFI icon" class="alegrUFI-icon">
 		 <h1 class="alegrUFI-title">alegrUFI</h1>
@@ -99,5 +109,29 @@
 	});
 	</script>
 	<script src="ufibot.js"></script>
+</div>
+<script>
+// Oculta el contenido principal hasta login exitoso
+document.getElementById('mainContent').style.display = 'none';
+document.getElementById('loginBox').style.display = '';
+document.getElementById('loginForm').onsubmit = async function(e) {
+	e.preventDefault();
+	const username = document.getElementById('username').value;
+	const password = document.getElementById('password').value;
+	const res = await fetch('http://localhost:3000/login', {
+		method: 'POST',
+		headers: { 'Content-Type': 'application/json' },
+		body: JSON.stringify({ username, password })
+	});
+	const data = await res.json();
+	if (data.success) {
+		document.getElementById('loginMsg').textContent = 'Login OK';
+		document.getElementById('mainContent').style.display = '';
+		document.getElementById('loginBox').style.display = 'none';
+	} else {
+		document.getElementById('loginMsg').textContent = 'Login failed';
+	}
+};
+</script>
 </body>
 </html>

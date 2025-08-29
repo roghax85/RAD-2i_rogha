@@ -15,9 +15,8 @@
 		<button id="printHelpBtn">PrintHelp</button>
 	</header>
 	<div>
-	
 		<label for="serviceId">Service ID:</label><br>
-		<input type="text" id="serviceId" name="serviceId" maxlength="16" minlength="16" required pattern=".{15}C"><br>
+		<input type="text" id="serviceId" name="serviceId" maxlength="16" minlength="16" required pattern=".{15}C" placeholder="HNHNCUS12345678C"><br>
 		<label for="pdfInput">Choose a PDF file:</label><br>
 		<input type="file" id="pdfInput" accept="application/pdf" disabled><br>
 		<button id="extractBtn">GetheBit</button>
@@ -25,6 +24,7 @@
 		<form id="formDatos">
 	<table width="100%"><tr valign="top">
 	<td id="td1">
+
 		<label for="deviceAccessEnd">Device Access End:</label><br>
 		<input type="text" id="deviceAccessEnd" name="deviceAccessEnd"><br>
 		<label for="portAccessEnd">Port Access End:</label><br>
@@ -37,6 +37,8 @@
 		<input type="text" id="vlanMGMTEnd" name="vlanMGMTEnd"><br>
 		<label for="asnSource">ASN Source:</label><br>
 		<input type="text" id="asnSource" name="asnSource"><br>
+		<label for="cusPlace">Customer Place POP:</label><br>
+		<input placeholder="Agencia PicaPiedras" type="text" id="cusPlace" name="cusPlace"><br>
 	</td>
 	<td id="td2">
 		<label for="ipDeviceAccessEnd">IP Device Access End:</label><br>
@@ -52,10 +54,13 @@
 		<label for="ipiBGPvrf">Network for iBGP:</label><br>
 		<input type="text" id="ipiBGPvrf" name="ipiBGPvrf"><br>
 		<label for="ipWANCus">Network for WAN:</label><br>
-		<input type="text" id="ipWANCus" name="ipWANCus"><br>
+		<input placeholder="Lan CUS 172.31.242/30" type="text" id="ipWANCus" name="ipWANCus"><br>
 	</td>
-	</tr></table>
-		</form>
+	</tr>
+		</table>
+	<label for="serviceName">Service Name:</label><br>
+		<input type="text" id="serviceName" name="serviceName" readonly><br>
+	</form>
 	<button type="button" id="makeMyWorkBtn">Make my work</button>
 	<textarea id="outputText"></textarea>
 	<button id="copyOutputBtn">Try to catch me!</button>

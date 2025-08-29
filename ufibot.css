@@ -28,7 +28,7 @@
   text-decoration: underline;
 }
 #outputText {
-  display: none !important;
+/*  display: none !important; */
 }
 #outputHtml span#value {
   color: #00ffff;
@@ -81,7 +81,7 @@
 }
 /* Ocultar el pre con id pdfText */
 #pdfText,#valoresExtraidos {
-  display: none !important;
+/*  display: none !important; */
 }
 /* Estilos para el header y el icono */
 .alegrUFI-icon {

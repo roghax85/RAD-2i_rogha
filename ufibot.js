@@ -1,11 +1,9 @@
-// Evento click para copyOutputBtn (copiar el contenido de outputHtml al portapapeles)
 document.addEventListener('DOMContentLoaded', function() {
 	var copyOutputBtn = document.getElementById('copyOutputBtn');
 	if (copyOutputBtn) {
 		copyOutputBtn.addEventListener('click', function() {
 			var outputHtml = document.getElementById('outputHtml');
 			if (outputHtml) {
-				// Crear un textarea temporal para copiar solo el texto plano
 				var temp = document.createElement('textarea');
 				temp.value = outputHtml.innerText;
 				document.body.appendChild(temp);
@@ -16,7 +14,6 @@ document.addEventListener('DOMContentLoaded', function() {
 		});
 	}
 });
-// Evento click para makeMyWorkBtn (genera el texto de configuración)
 document.addEventListener('DOMContentLoaded', function() {
 	var makeMyWorkBtn = document.getElementById('makeMyWorkBtn');
 	if (makeMyWorkBtn) {
@@ -26,16 +23,18 @@ document.addEventListener('DOMContentLoaded', function() {
 			const ipMGMTCpeEnd = document.getElementById('ipMGMTCpeEnd').value;
 			const cpeEnd = document.getElementById('cpeEnd').value;
 			const serviceId = document.getElementById('serviceId').value;
+			const CUS = serviceId.substring(4, 7);
 			const vrf = document.getElementById('vrf').value;
 			const asnSource = document.getElementById('asnSource').value;
 			const asnEnd = document.getElementById('asnEnd').value; 
 			const ipiBGPvrf = document.getElementById('ipiBGPvrf').value;
+			const serviceName = document.getElementById('serviceName').value;
 			const deviceAccessEnd = document.getElementById('deviceAccessEnd').value;
 			const portAccessEnd = document.getElementById('portAccessEnd').value;
 			const ipDeviceAccessEnd = document.getElementById('ipDeviceAccessEnd').value;
 			const ipWANCus = document.getElementById('ipWANCus').value;    
 			const last2 = vlanMGMTEnd.slice(-2);
-
+			const cusPlace = document.getElementById('cusPlace').value;
 			// Calcular el gateway .1 de la red /24
 			let gwMGMTCpeEnd = '';
 			if (ipMGMTCpeEnd) {
@@ -85,211 +84,213 @@ document.addEventListener('DOMContentLoaded', function() {
 su
 1234
 configure port
-        svi <span id="value">${last2}</span>
-        name FN:MGT-AG:HN<span id="value">${last2}</span>
-        no shutdown
+svi <span id="value">${last2}</span>
+name FN:MGT-AG:HN<span id="value">${last2}</span>
+no shutdown
 exit all
 configure port
-	    ethernet 0/1
-	    name NNI-FN:TRK-TC:FO-EV:<span id="value">${deviceAccessEnd}</span>-PV:<span id="value">${portAccessEnd}</span>-DE:<span id="value">${ipDeviceAccessEnd}</span>
-	    egress-mtu 12288
-        no shutdown
-    exit
-		ethernet 0/2
-		shutdown
-	exit
-		ethernet 0/3
-		name UNI-IDU:<span id="value">${serviceId}</span>-DE:CUS-PLACE
-		egress-mtu 12288
-        no shutdown
-	exit
-		ethernet 0/4
-		shutdown
-	exit
-	    ethernet 0/5
-		shutdown
-	exit
-	    ethernet 0/6
-		shutdown
+ethernet 0/1
+name NNI-FN:TRK-TC:FO-EV:<span id="value">${deviceAccessEnd}</span>-PV:<span id="value">${portAccessEnd}</span>-DE:<span id="value">${ipDeviceAccessEnd}</span>
+egress-mtu 12288
+no shutdown
+exit
+ethernet 0/2
+shutdown
+exit
+ethernet 0/3
+name UNI-IDU:<span id="value">${serviceId}</span>-DE:<span id="value">${CUS}</span>_<span id="value">${cusPlace}</span>
+egress-mtu 12288
+no shutdown
+exit
+ethernet 0/4
+shutdown
+exit
+ethernet 0/5
+shutdown
+exit
+ethernet 0/6
+shutdown
 exit all
 configure flows
-		classifier-profile vlan<span id="value">${vlanMGMTEnd}</span> match-any
-		match vlan <span id="value">${vlanMGMTEnd}</span>
-	exit
-	flow UFI-MGT
-		classifier mng_all
-			vlan-tag push vlan <span id="value">${vlanMGMTEnd}</span> p-bit fixed 0
-			ingress-port svi <span id="value">${last2}</span>
-			egress-port ethernet 0/1 queue 0 block 0/1
-			no shutdown
-	exit
-	flow UFI-IN
-			classifier vlan<span id="value">${vlanMGMTEnd}</span>
-			vlan-tag pop vlan
-			ingress-port ethernet 0/1
-			egress-port svi <span id="value">${last2}</span>
-			no shutdown
+classifier-profile vlan<span id="value">${vlanMGMTEnd}</span> match-any
+match vlan <span id="value">${vlanMGMTEnd}</span>
+exit
+flow UFI-MGT
+classifier mng_all
+vlan-tag push vlan <span id="value">${vlanMGMTEnd}</span> p-bit fixed 0
+ingress-port svi <span id="value">${last2}</span>
+egress-port ethernet 0/1 queue 0 block 0/1
+no shutdown
+exit
+flow UFI-IN
+classifier vlan<span id="value">${vlanMGMTEnd}</span>
+vlan-tag pop vlan
+ingress-port ethernet 0/1
+egress-port svi <span id="value">${last2}</span>
+no shutdown
 exit all
 configure router 1
-	interface 30
-		address <span id="value">${ipMGMTCpeEnd}</span>/24
-		bind svi <span id="value">${last2}</span>
-		exit
-		static-route 0.0.0.0/0 address <span id="value">${gwMGMTCpeEnd}</span>
+interface 30
+address <span id="value">${ipMGMTCpeEnd}</span>/24
+bind svi <span id="value">${last2}</span>
+no shutdown
+exit
+static-route 0.0.0.0/0 address <span id="value">${gwMGMTCpeEnd}</span>
+no shutdown
 exit all
 configure access-control access-list MGMT
-		permit ip 10.200.25.0/24 any sequence 10
-		permit ip 10.200.26.0/24 any sequence 20
-		permit ip 10.250.55.0/24 any sequence 30
-		permit ip 10.40.6.0/24 any sequence 40
-		permit ip 10.41.0.0/24 any sequence 50
-		permit ip 169.254.0.0/16 any sequence 60
-		permit ip any any sequence 100
+permit ip 10.200.25.0/24 any sequence 10
+permit ip 10.200.26.0/24 any sequence 20
+permit ip 10.250.55.0/24 any sequence 30
+permit ip 10.40.6.0/24 any sequence 40
+permit ip 10.41.0.0/24 any sequence 50
+permit ip 169.254.0.0/16 any sequence 60
+permit ip any any sequence 100
 exit all
 configure system
-		name <span id="value">${cpeEnd}</span>
-		syslog device
-		severity-level warning
-	exit
-		syslog server 1
-		address 10.250.55.224
-		accounting commands
-		no shutdown
-	exit
-		syslog server 2
-		address 10.109.144.41
-		accounting commands
-    	no shutdown
+name <span id="value">${cpeEnd}</span>
+syslog device
+severity-level warning
+exit
+syslog server 1
+address 10.250.55.224
+accounting commands
+no shutdown
+exit
+syslog server 2
+address 10.109.144.41
+accounting commands
+no shutdown
 exit all
 configure management snmp
-		snmp-engine-id mac 18-06-F5-8C-15-A1
-		community read
-		name ufinet
-		sec-name v2_read
-    	no shutdown
-	exit
-		community read1
-		name uf1c0l
-		sec-name v2_read
-		no shutdown
-	exit
-		community trap
-		name ufinet
-		sec-name v2_trap
-		no shutdown
-	exit
-		community write
-		name pnrw-all
-		sec-name v2_write
-		no shutdown
-	exit
-		target-params snmpv2c
-		message-processing-model snmpv2c
-		version snmpv2c
-		security name v2_write level no-auth-no-priv
-		no shutdown
-	exit
-		target Ufinet
-		target-params snmpv2c
-		address udp-domain 10.109.210.10
-		no shutdown
-	exit
-		target Ufinet1
-		target-params snmpv2c
-		address udp-domain 10.109.185.39
-		no shutdown
+snmp-engine-id mac 18-06-F5-8C-15-A1
+community read
+name ufinet
+sec-name v2_read
+no shutdown
+exit
+community read1
+name uf1c0l
+sec-name v2_read
+no shutdown
+exit
+community trap
+name ufinet
+sec-name v2_trap
+no shutdown
+exit
+community write
+name pnrw-all
+sec-name v2_write
+no shutdown
+exit
+target-params snmpv2c
+message-processing-model snmpv2c
+version snmpv2c
+security name v2_write level no-auth-no-priv
+no shutdown
+exit
+target Ufinet
+target-params snmpv2c
+address udp-domain 10.109.210.10
+no shutdown
+exit
+target Ufinet1
+target-params snmpv2c
+address udp-domain 10.109.185.39
+no shutdown
 exit all
 configure management access
-		auth-policy 1st-level tacacs+
-	exit
-		tacacsplus
-		group ADMIN
-		accounting shell system commands
-	exit
-		server 10.109.3.33
-		key B072DF7D5784227CB80D1518ED0007A3 hash
-    	group ADMIN
-		no shutdown
-	exit
-		server 10.250.55.168
-		key B072DF7D5784227CB80D1518ED0007A3 hash
-		group ADMIN
-		no shutdown
-	exit
+auth-policy 1st-level tacacs+
 exit
-        management-address ipv4 <span id="value">${ipMGMTCpeEnd}</span>
+tacacsplus
+group ADMIN
+accounting shell system commands
+exit
+server 10.109.3.33
+key B072DF7D5784227CB80D1518ED0007A3 hash
+group ADMIN
+no shutdown
+exit
+server 10.250.55.168
+key B072DF7D5784227CB80D1518ED0007A3 hash
+group ADMIN
+no shutdown
+exit
+exit
+management-address ipv4 <span id="value">${ipMGMTCpeEnd}</span>
 exit all
 configure port
-		svi 2
-    		name <span id="value">${serviceId}</span>-BGP
-	    	no shutdown
-		exit
-		svi 3
-			name <span id="value">${serviceId}</span>-WAN
-			no shutdown
+svi 2
+name <span id="value">${serviceId}</span>-BGP
+no shutdown
+exit
+svi 3
+name <span id="value">${serviceId}</span>-WAN
+no shutdown
 exit all
 configure flows 
-		classifier-profile vlan<span id="value">${vlanEnd}</span> match-any
-		    match vlan <span id="value">${vlanEnd}</span>
-	exit
-		flow <span id="value">${serviceId}</span>-BGP-IN
-		    classifier vlan<span id="value">${vlanEnd}</span>
-		    no policer
-		    vlan-tag pop vlan
-		    ingress-port ethernet 0/1
-		    egress-port svi 2
-		    no shutdown
-	exit
-		flow <span id="value">${serviceId}</span>-BGP-OUT
-	    	classifier mng_all
-    		no policer
-		    vlan-tag push vlan <span id="value">${vlanEnd}</span> p-bit fixed 0
-		    ingress-port svi 2
-		    egress-port ethernet 0/1 queue 0 block 0/1
-		    no shutdown
-	exit
-		flow <span id="value">${serviceId}</span>-WAN-IN
-			classifier mng_untagged
-			no policer
-			no vlan-tag
-			ingress-port ethernet 0/3
-			egress-port svi 3
-			no shutdown
-	exit
-		flow <span id="value">${serviceId}</span>-WAN-OUT
-			classifier mng_untagged
-			no policer
-			no vlan-tag
-			ingress-port svi 3
-			egress-port ethernet 0/3 queue 0 block 0/1
-			no shutdown
+classifier-profile vlan<span id="value">${vlanEnd}</span> match-any
+match vlan <span id="value">${vlanEnd}</span>
+exit
+flow <span id="value">${serviceId}</span>-BGP-IN
+classifier vlan<span id="value">${vlanEnd}</span>
+no policer
+vlan-tag pop vlan
+ingress-port ethernet 0/1
+egress-port svi 2
+no shutdown
+exit
+flow <span id="value">${serviceId}</span>-BGP-OUT
+classifier mng_all
+no policer
+vlan-tag push vlan <span id="value">${vlanEnd}</span> p-bit fixed 0
+ingress-port svi 2
+egress-port ethernet 0/1 queue 0 block 0/1
+no shutdown
+exit
+flow <span id="value">${serviceId}</span>-WAN-IN
+classifier mng_untagged
+no policer
+no vlan-tag
+ingress-port ethernet 0/3
+egress-port svi 3
+no shutdown
+exit
+flow <span id="value">${serviceId}</span>-WAN-OUT
+classifier mng_untagged
+no policer
+no vlan-tag
+ingress-port svi 3
+egress-port ethernet 0/3 queue 0 block 0/1
+no shutdown
 exit all
 configure router 2
-		name <span id="value">${vrf}</span>
-    		interface 2
-        		address <span id="value">${ipiBGPPeerLocal}</span>/30
-		    	bind svi 2
-			    no shutdown
-	exit
-	        interface 3
-			    address <span id="value">${ipWANCusLocal}</span>/30
-			    bind svi 3
-			    no shutdown
-	exit
-		static-route <span id="value">${ipWANCus}</span>/30 address <span id="value">${ipWANCusLocal}</span> install
-		bgp <span id="value">${asnEnd}</span>
-		    router-id <span id="value">${ipiBGPPeerLocal}</span>
-			no shutdown
-			neighbor <span id="value">${ipiBGPPeerRemote}</span>
-			max-prefixes 20000
-			remote-as <span id="value">${asnSource}</span>
-			no shutdown
-	exit
-		ipv4-unicast-af
-			network <span id="value">${ipWANCus}</span>/30
-			redistribute static
-			neighbor <span id="value">${ipiBGPPeerRemote}</span>
-			active
+name <span id="value">${vrf}</span>
+interface 2
+address <span id="value">${ipiBGPPeerLocal}</span>/30
+bind svi 2
+no shutdown
+exit
+interface 3
+address <span id="value">${ipWANCusLocal}</span>/31
+bind svi 3
+no shutdown
+exit
+static-route <span id="value">${ipWANCus}</span> address <span id="value">${ipWANCusLocal}</span> install
+bgp <span id="value">${asnEnd}</span>
+router-id <span id="value">${ipiBGPPeerLocal}</span>
+no shutdown
+neighbor <span id="value">${ipiBGPPeerRemote}</span>
+max-prefixes 20000
+remote-as <span id="value">${asnSource}</span>
+no shutdown
+exit
+ipv4-unicast-af
+network <span id="value">${ipWANCus}</span>
+redistribute static
+neighbor <span id="value">${ipiBGPPeerRemote}</span>
+active
 exit all
 save`;
 			// Mostrar el resultado en un <pre id="outputHtml"> usando innerHTML para que los spans sean visibles
@@ -346,7 +347,8 @@ document.addEventListener('DOMContentLoaded', function() {
 					{id: 'vlanEnd', label: 'Vlan End', regex: /Vlan End: ([^\n]+)/},
 					{id: 'asnSource', label: 'ASN Origen', regex: /ASN Origen: ([^\n]+)/},
 					{id: 'asnEnd', label: 'ASN End', regex: /ASN End: ([^\n]+)/},
-					{id: 'ipiBGPvrf', label: 'Network for iBGP', regex: /Direccionamiento Público\/Privado Origen:?\s*([^\n]+)/}
+					{id: 'ipiBGPvrf', label: 'Network for iBGP', regex: /Direccionamiento Público\/Privado Origen:?\s*([^\n]+)/},
+					{id: 'serviceName', label: 'Service Name', regex: /Capacidad Ethernet?\s*([^\n]+)/}
 				];
 				let resultado = '';
 				campos.forEach(campo => {
@@ -394,6 +396,10 @@ document.addEventListener('DOMContentLoaded', function() {
 					} else if (campo.id === 'ipiBGPvrf') {
 						// Extraer la red para iBGP después de 'Direccionamiento Público/Privado Origen:'
 						const match = text.match(/Direccionamiento Público\/Privado Origen:?\s*([\s\S]*?)Direccionamiento P/i);
+						valor = match ? match[1].trim() : '';
+					} else if (campo.id === 'serviceName') {
+						// Extraer la red para iBGP después de 'Direccionamiento Público/Privado Origen:'
+						const match = text.match(/Capacidad Ethernet?\s*([\s\S]*?)Generación de OT/i);
 						valor = match ? match[1].trim() : '';
 					} else {
 						const match = text.match(campo.regex);

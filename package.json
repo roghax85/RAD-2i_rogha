@@ -1,0 +1,13 @@
+{
+  "name": "rad-2i_rogha-backend",
+  "version": "1.0.0",
+  "main": "backend.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node backend.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "jsonwebtoken": "^9.0.2"
+  }
+}

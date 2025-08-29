@@ -1,16 +1,19 @@
-# Use an official lightweight nginx image
-FROM nginx:alpine
+FROM node:18-alpine
 
 # Set working directory
-WORKDIR /usr/share/nginx/html
+WORKDIR /app
 
-# Remove default nginx static assets
-RUN rm -rf ./*
+# Copy package.json and package-lock.json if present
+COPY package*.json ./
 
-# Copy all static files from the app to nginx html dir
+# Install dependencies
+RUN npm install || true
+
+# Copy the rest of the app
 COPY . .
 
-# Expose port 80
-EXPOSE 80
+# Expose port 8989
+EXPOSE 8989
 
-# No CMD needed, nginx default is fine
+# Start the backend on port 8989
+CMD ["node", "backend.js"]

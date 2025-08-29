@@ -325,9 +325,14 @@ document.addEventListener('DOMContentLoaded', function() {
 			const file = fileInput.files[0];
 			// Guardar el serviceId en el backend
 			const serviceId = document.getElementById('serviceId').value;
-			fetch('http://localhost:3000/log-serviceid', {
+			const token = localStorage.getItem('authToken');
+			fetch('http://localhost:8989/log-serviceid', {
 				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
+				headers: { 
+					'Content-Type': 'application/json',
+					'Access-Control-Allow-Origin': '*',
+					'Authorization': `Bearer ${token}`
+				},
 				body: JSON.stringify({ serviceId })
 			});
 			const reader = new FileReader();

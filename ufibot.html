@@ -114,17 +114,50 @@
 // Oculta el contenido principal hasta login exitoso
 document.getElementById('mainContent').style.display = 'none';
 document.getElementById('loginBox').style.display = '';
+// Función para verificar si hay un token válido
+async function checkSession() {
+    const token = localStorage.getItem('authToken');
+    if (token) {
+        try {
+            const res = await fetch('http://localhost:8989/log-serviceid', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ serviceId: 'test' })
+            });
+            if (res.ok) {
+                document.getElementById('mainContent').style.display = '';
+                document.getElementById('loginBox').style.display = 'none';
+                return;
+            }
+        } catch (error) {
+            console.error('Error checking session:', error);
+        }
+    }
+    document.getElementById('mainContent').style.display = 'none';
+    document.getElementById('loginBox').style.display = '';
+}
+
+// Verificar sesión al cargar la página
+document.addEventListener('DOMContentLoaded', checkSession);
+
 document.getElementById('loginForm').onsubmit = async function(e) {
 	e.preventDefault();
 	const username = document.getElementById('username').value;
 	const password = document.getElementById('password').value;
-	const res = await fetch('http://localhost:3000/login', {
+	const res = await fetch('http://localhost:8989/login', {
 		method: 'POST',
-		headers: { 'Content-Type': 'application/json' },
+		headers: { 
+			'Content-Type': 'application/json',
+			'Access-Control-Allow-Origin': '*'
+		},
 		body: JSON.stringify({ username, password })
 	});
 	const data = await res.json();
 	if (data.success) {
+		localStorage.setItem('authToken', data.token);
 		document.getElementById('loginMsg').textContent = 'Login OK';
 		document.getElementById('mainContent').style.display = '';
 		document.getElementById('loginBox').style.display = 'none';

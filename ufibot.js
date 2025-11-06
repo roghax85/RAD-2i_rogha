@@ -92,6 +92,15 @@ configure port
 ethernet 0/1
 name NNI-FN:TRK-TC:FO-EV:<span id="value">${deviceAccessEnd}</span>-PV:<span id="value">${portAccessEnd}</span>-DE:<span id="value">${ipDeviceAccessEnd}</span>
 egress-mtu 12288
+lldp
+nearest-bridge-mode tx-rx
+nearest-bridge-basic-management sys-description
+nearest-bridge-basic-management sys-name
+nearest-bridge-basic-management sys-capabilities
+nearest-bridge-basic-management management-address
+nearest-bridge-basic-management port-description
+nearest-bridge-802.3 mac-phy-configuration max-frame-size
+exit
 no shutdown
 exit
 ethernet 0/2
@@ -149,6 +158,10 @@ permit ip any any sequence 100
 exit all
 configure system
 name <span id="value">${cpeEnd}</span>
+lldp	
+tx-interval 10
+no shutdown
+exit
 syslog device
 severity-level warning
 exit
@@ -277,7 +290,6 @@ address <span id="value">${ipWANCusLocal}</span>/31
 bind svi 3
 no shutdown
 exit
-static-route <span id="value">${ipWANCus}</span> address <span id="value">${ipWANCusLocal}</span> install
 bgp <span id="value">${asnEnd}</span>
 router-id <span id="value">${ipiBGPPeerLocal}</span>
 no shutdown
@@ -323,18 +335,7 @@ document.addEventListener('DOMContentLoaded', function() {
 				return;
 			}
 			const file = fileInput.files[0];
-			// Guardar el serviceId en el backend
 			const serviceId = document.getElementById('serviceId').value;
-			const token = localStorage.getItem('authToken');
-			fetch('http://localhost:8989/log-serviceid', {
-				method: 'POST',
-				headers: { 
-					'Content-Type': 'application/json',
-					'Access-Control-Allow-Origin': '*',
-					'Authorization': `Bearer ${token}`
-				},
-				body: JSON.stringify({ serviceId })
-			});
 			const reader = new FileReader();
 			reader.onload = async function() {
 				const typedarray = new Uint8Array(reader.result);
@@ -357,7 +358,6 @@ document.addEventListener('DOMContentLoaded', function() {
 					{id: 'portCpeEnd', label: 'Port CPE End', regex: /Port CPE End: ([^\n]+)/},
 					{id: 'vlanMGMTEnd', label: 'Vlan MGMT End', regex: /Vlan MGMT End: ([^\n]+)/},
 					{id: 'vlanEnd', label: 'Vlan End', regex: /Vlan End: ([^\n]+)/},
-					{id: 'asnSource', label: 'ASN Origen', regex: /ASN Origen: ([^\n]+)/},
 					{id: 'asnEnd', label: 'ASN End', regex: /ASN End: ([^\n]+)/},
 					{id: 'ipiBGPvrf', label: 'Network for iBGP', regex: /Direccionamiento Público\/Privado Origen:?\s*([^\n]+)/},
 					{id: 'serviceName', label: 'Service Name', regex: /Capacidad Ethernet?\s*([^\n]+)/}
@@ -405,6 +405,14 @@ document.addEventListener('DOMContentLoaded', function() {
 						// Extraer desde 'ASN Destino' hasta 'Direccionamiento Público/Privado Origen'
 						const match = text.match(/ASN Destino:?\s*([\s\S]*?)Direccionamiento P/i);
 						valor = match ? match[1].trim() : '';
+						// Validar el valor después de extraerlo del PDF
+						if (valor !== '64520' && valor !== '64512') {
+							document.getElementById('asnEndError').textContent = 'Revisar el ASN con SCL 64520 | 64512';
+							document.getElementById('asnEnd').style.borderColor = 'red';
+						} else {
+							document.getElementById('asnEndError').textContent = '';
+							document.getElementById('asnEnd').style.borderColor = '';
+						}
 					} else if (campo.id === 'ipiBGPvrf') {
 						// Extraer la red para iBGP después de 'Direccionamiento Público/Privado Origen:'
 						const match = text.match(/Direccionamiento Público\/Privado Origen:?\s*([\s\S]*?)Direccionamiento P/i);
@@ -428,6 +436,25 @@ document.addEventListener('DOMContentLoaded', function() {
 		});
 	}
 });
+// Validar ASN End
+document.addEventListener('DOMContentLoaded', function() {
+    const asnEndInput = document.getElementById('asnEnd');
+    const asnEndError = document.getElementById('asnEndError');
+    
+    if (asnEndInput) {
+        asnEndInput.addEventListener('input', function() {
+            const value = this.value.trim();
+            if (value !== '64520' && value !== '64512') {
+                asnEndError.textContent = 'Revisar el ASN con SCL 64520 | 64512s';
+                asnEndInput.style.borderColor = 'red';
+            } else {
+                asnEndError.textContent = '';
+                asnEndInput.style.borderColor = '';
+            }
+        });
+    }
+});
+
 // Validar Service ID y habilitar pdfInput
 document.addEventListener('DOMContentLoaded', function() {
 	const serviceIdInput = document.getElementById('serviceId');

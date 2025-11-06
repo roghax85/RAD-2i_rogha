@@ -7,16 +7,7 @@
 	<!-- Material 3 CSS -->
 </head>
 <body>
-	<div id="loginBox">
-		<h3>Login</h3>
-		<form id="loginForm">
-			<input type="text" id="username" placeholder="User" required><br>
-			<input type="password" id="password" placeholder="Password" required><br>
-			<button type="submit">Login</button>
-			<div id="loginMsg" style="color:red"></div>
-		</form>
-	</div>
-	<div id="mainContent" style="display:none;">
+	<div id="mainContent">
 	<header>
 		 <img src="ths95rths95rths9.png" alt="alegrUFI icon" class="alegrUFI-icon">
 		 <h1 class="alegrUFI-title">alegrUFI</h1>
@@ -46,7 +37,7 @@
 		<label for="vlanMGMTEnd">Vlan MGMT End:</label><br>
 		<input type="text" id="vlanMGMTEnd" name="vlanMGMTEnd"><br>
 		<label for="asnSource">ASN Source:</label><br>
-		<input type="text" id="asnSource" name="asnSource"><br>
+		<input placeholder="52468" type="text" id="asnSource" name="asnSource" value="52468" disabled><br>
 		<label for="cusPlace">Customer Place POP:</label><br>
 		<input placeholder="Agencia PicaPiedras" type="text" id="cusPlace" name="cusPlace"><br>
 	</td>
@@ -60,7 +51,8 @@
 		<label for="vlanEnd">Vlan End:</label><br>
 		<input type="text" id="vlanEnd" name="vlanEnd"><br>
 		<label for="asnEnd">ASN End:</label><br>
-		<input type="text" id="asnEnd" name="asnEnd"><br>
+		<input placeholder="64520 / 64512" type="text" id="asnEnd" name="asnEnd"><br>
+		<span id="asnEndError" style="color: red;"></span>
 		<label for="ipiBGPvrf">Network for iBGP:</label><br>
 		<input type="text" id="ipiBGPvrf" name="ipiBGPvrf"><br>
 		<label for="ipWANCus">Network for WAN:</label><br>
@@ -110,61 +102,5 @@
 	</script>
 	<script src="ufibot.js"></script>
 </div>
-<script>
-// Oculta el contenido principal hasta login exitoso
-document.getElementById('mainContent').style.display = 'none';
-document.getElementById('loginBox').style.display = '';
-// Función para verificar si hay un token válido
-async function checkSession() {
-    const token = localStorage.getItem('authToken');
-    if (token) {
-        try {
-            const res = await fetch('http://localhost:8989/log-serviceid', {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ serviceId: 'test' })
-            });
-            if (res.ok) {
-                document.getElementById('mainContent').style.display = '';
-                document.getElementById('loginBox').style.display = 'none';
-                return;
-            }
-        } catch (error) {
-            console.error('Error checking session:', error);
-        }
-    }
-    document.getElementById('mainContent').style.display = 'none';
-    document.getElementById('loginBox').style.display = '';
-}
-
-// Verificar sesión al cargar la página
-document.addEventListener('DOMContentLoaded', checkSession);
-
-document.getElementById('loginForm').onsubmit = async function(e) {
-	e.preventDefault();
-	const username = document.getElementById('username').value;
-	const password = document.getElementById('password').value;
-	const res = await fetch('http://localhost:8989/login', {
-		method: 'POST',
-		headers: { 
-			'Content-Type': 'application/json',
-			'Access-Control-Allow-Origin': '*'
-		},
-		body: JSON.stringify({ username, password })
-	});
-	const data = await res.json();
-	if (data.success) {
-		localStorage.setItem('authToken', data.token);
-		document.getElementById('loginMsg').textContent = 'Login OK';
-		document.getElementById('mainContent').style.display = '';
-		document.getElementById('loginBox').style.display = 'none';
-	} else {
-		document.getElementById('loginMsg').textContent = 'Login failed';
-	}
-};
-</script>
 </body>
 </html>

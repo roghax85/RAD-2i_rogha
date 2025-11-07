@@ -14,6 +14,7 @@
 		<p>Get Data info for RAD ETC L3 Service config CPE</p>
 	<p>supported by <a class="alegrUFI-link" href="mailto:rham@ufinet.com">rham@ufinet.com</a></p>
 		<button id="printHelpBtn">PrintHelp</button>
+		<button id="PDFHelpBtn" onclick="abrirPDF('suyapaT.pdf')">PDFHelp</button>
 	</header>
 	<div>
 		<label for="serviceId">Service ID:</label><br>
@@ -64,9 +65,8 @@
 		<input type="text" id="serviceName" name="serviceName" readonly><br>
 	</form>
 	<button type="button" id="makeMyWorkBtn">Make my work</button>
-	<textarea id="outputText"></textarea>
 	<button id="copyOutputBtn">Try to catch me!</button>
-		<pre id="valoresExtraidos"><h5>Material:</h5></pre>
+	<textarea id="outputText"></textarea>
 	<pre id="pdfText"></pre>
 	</div>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
@@ -91,16 +91,17 @@
 			<body>
 				<div class="img-container">
 					<div class="help-text">
-						Print in Tabloid size, Margin: 1" top and footer, no print headers, footers and Graphis
+						Print in Tabloid size, Margin: 0" Zoom: 97%
 					</div>
 					<img src="printHelp.png" alt="Print Help">
 				</div>
+				<button id="PDFHelpBtn">PDFHelp</button>
 			</body>
 			</html>
 		`);
 	});
 	</script>
-	<script src="ufibot.js"></script>
+	<script src="ufibot.20251107.js"></script>
 </div>
 </body>
 </html>

@@ -1,4 +1,6 @@
-document.addEventListener('DOMContentLoaded', function() {
+console.log('JS file loaded');
+
+	document.addEventListener('DOMContentLoaded', function() {
 	var copyOutputBtn = document.getElementById('copyOutputBtn');
 	if (copyOutputBtn) {
 		copyOutputBtn.addEventListener('click', function() {
@@ -469,3 +471,19 @@ document.addEventListener('DOMContentLoaded', function() {
 		});
 	}
 });
+
+
+
+// La función que se llama al hacer clic en el botón
+function abrirPDF(urlPDF) {
+    // Especifica la URL del PDF que quieres abrir
+    const url = urlPDF; 
+    
+    // Define las características de la ventana emergente (popup)
+    // 'target' o 'nombre_de_la_ventana': Un nombre único para la ventana.
+    // 'features': Cadena que define el tamaño, la posición y las barras de la ventana.
+    const caracteristicas = 'width=800,height=600,scrollbars=yes,resizable=yes';
+
+    // Abre la nueva ventana con el PDF
+    window.open(url, 'PDFWindow', caracteristicas);
+}
